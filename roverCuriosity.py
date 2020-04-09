@@ -9,7 +9,7 @@ class Rocha:
 
     def __init__(self):
         self.__peso = round(uniform(0.5, 14.2), 1)
-        self.__diametro = round(uniform(0.1, 5), 1)
+        self.__diametro = round(uniform(0.1, 1.0), 1)
         self.__tipo = randint(1, 3)
 
     @property
@@ -28,7 +28,7 @@ class Rocha:
 class Lixo:
     def __init__(self):
         self.__peso = round(uniform(1.12, 8.55), 2)
-        self.__diametro = round(uniform(0.1, 5), 2)
+        self.__diametro = round(uniform(0.1, 1.0), 2)
         self.__tipo = choice(['metalico', 'nao-metalico'])
 
     @property
@@ -66,26 +66,6 @@ class Curiosity:
     @property
     def capacidade(self):
         return self.__capacidade
-
-
-def gera_item():
-    n = choice([1, 2])
-    if n == 1:
-        gerou = Rocha()
-        item = {
-            "peso": gerou.peso,
-            "diametro": gerou.diametro,
-            "tipo": gerou.tipo
-        }
-    else:
-        gerou = Lixo()
-        item = {
-            "peso": gerou.peso,
-            "diametro": gerou.diametro,
-            "tipo": gerou.tipo
-        }
-
-    return item
 
 
 def discenir_item(item):
@@ -164,14 +144,9 @@ def Curiosity_aviso_capacidade():
     sleep(1)
     print('Curiosity esta equilibrando os tipos de rochas!')
     sleep(1)
-    print('Tipo de rochas equilibrada, continuando expedicao em: ')
-    print(3)
+    print('Equilibrio concluido!')
     sleep(1)
-    print(2)
-    sleep(1)
-    print(1)
-    sleep(1)
-    print(0)
+    print('---------------------------------------------------------------------')
     sleep(1)
 
 
@@ -181,61 +156,102 @@ def Curiosity_aviso_coleta(item, objeto, Curiosity):
         item, objeto, Curiosity.capacidade))
 
 
+def valida_equilibrio(n1, n2, n3):
+    if (n1 - 1) == n2 and n2 == n3 or (n1 + 1) == n2 and n2 == n3:
+        return True
+    if (n2 - 1) == n1 and n1 == n3 or (n2 + 1) == n1 and n1 == n3:
+        return True
+    if (n3 - 1) == n2 and n2 == n1 or (n3 + 1) == n2 and n2 == n1:
+        return True
+
+
 def valida_expedicao(Curiosity):
     deposito_1 = len(Curiosity.deposito_rocha['tipo_1'])
     deposito_2 = len(Curiosity.deposito_rocha['tipo_2'])
     deposito_3 = len(Curiosity.deposito_rocha['tipo_3'])
 
     if(Curiosity.capacidade > 69.5):
-        if(deposito_1 == deposito_2 and deposito_2 == deposito_3):
+        if(valida_equilibrio(deposito_1, deposito_2, deposito_3)):
             return True
         else:
             return False
 
 
 def encerra_expedicao(Curiosity):
+    lixos = Curiosity.deposito_lixo
+    rochas = Curiosity.deposito_rocha
+    total_rochas = rochas['tipo_1'] + rochas['tipo_2'] + rochas['tipo_3']
     sleep(1)
     print('===================================================')
     print('Expedicao encerrada!')
-    print('===================================================')
+    print('---------------------------------------------------')
     sleep(1)
     print('Emitindo relatorio...')
     sleep(1)
     print('===================================================')
-    print('Rochas tipo 1: {}'.format(len(Curiosity.deposito_rocha['tipo_1'])))
-    print('Rochas tipo 2: {}'.format(len(Curiosity.deposito_rocha['tipo_2'])))
-    print('Rochas tipo 3: {}'.format(len(Curiosity.deposito_rocha['tipo_3'])))
+    print('Total de rochas: {}'.format(len(total_rochas)))
+    print('Rochas tipo 1: {}'.format(len(rochas['tipo_1'])))
+    print('Rochas tipo 2: {}'.format(len(rochas['tipo_2'])))
+    print('Rochas tipo 3: {}'.format(len(rochas['tipo_3'])))
     print('===================================================')
-    print('Lixo: {}'.format(len(Curiosity.deposito_lixo)))
+    print('Total de lixo: {}'.format(len(lixos)))
+    print('Lixo metalico: {}'.format(len(lixos)))
+    print('Lixo nao-metalico: {}'.format(len(lixos)))
     print('===================================================')
     sleep(1)
     print('Dirigindo-se a estacao espacial mais proxima')
     print('---------------------------------------------------')
     sleep(2)
-    print('Liberando elementos coletados durante a expedicao')
+    print('Curiosity terminou exploracao. Liberando espaco de armazenamento')
     print('---------------------------------------------------')
     sleep(2)
     print('Carga liberada!')
     print('---------------------------------------------------')
     sleep(1)
     print('Curiosity esta pronto para uma nova expedicao!')
+    print('===================================================')
 
 
-robo = Curiosity()
+def gera_lista_rocha():
+    lista = []
+    for c in range(randint(1000, 10001)):
+        rocha = Rocha()
+        lista.append(
+            {'peso': rocha.peso, 'diametro': rocha.diametro, 'tipo': rocha.tipo})
+    return lista
 
-while True:
-    objeto = gera_item()
-    item = discenir_item(objeto)
 
-    if robo.capacidade >= 69.5:
-        equilibra_rochas(robo)
-        Curiosity_aviso_capacidade()
+def gera_lista_lixo():
+    lista = []
+    for c in range(randint(1000, 1001)):
+        lixo = Lixo()
+        lista.append(
+            {'peso': lixo.peso, 'diametro': lixo.diametro, 'tipo': lixo.tipo})
+    return lista
 
-    if valida_item(item, objeto):
-        if(coleta_item(item, objeto, robo)):
-            Curiosity_aviso_coleta(item, objeto, robo)
 
-    if valida_expedicao(robo) == True:
-        break
+def inicia_expedicao(quantidade):
+    for expedicao in range(quantidade):
+        robo = Curiosity()
+        solo_marte = (gera_lista_rocha() + gera_lista_lixo())
+        for item in range(len(solo_marte)):
+            if(item % 2):
+                item_encontrado = solo_marte[0]
+                del solo_marte[0]
+            else:
+                item_encontrado = solo_marte.pop()
+            item = discenir_item(item_encontrado)
+            if robo.capacidade >= 69.5:
+                equilibra_rochas(robo)
+                Curiosity_aviso_capacidade()
 
-encerra_expedicao(robo)
+            if valida_item(item, item_encontrado):
+                if(coleta_item(item, item_encontrado, robo)):
+                    Curiosity_aviso_coleta(item, item_encontrado, robo)
+
+            if valida_expedicao(robo) == True:
+                break
+        encerra_expedicao(robo)
+
+
+inicia_expedicao(3)
